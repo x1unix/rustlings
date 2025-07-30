@@ -9,18 +9,16 @@
 use std::collections::HashMap;
 
 // A structure to store the goal details of a team.
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct TeamScores {
     goals_scored: u8,
     goals_conceded: u8,
 }
 
 impl TeamScores {
-    fn add(&self, other: &TeamScores) -> TeamScores {
-        TeamScores {
-            goals_scored: self.goals_scored + other.goals_scored,
-            goals_conceded: self.goals_conceded + other.goals_conceded,
-        }
+    fn add(&mut self, other: &TeamScores) {
+        self.goals_scored += other.goals_scored;
+        self.goals_conceded += other.goals_conceded;
     }
 
     fn new(goals_scored: u8, goals_conceded: u8) -> TeamScores {
@@ -52,12 +50,12 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
 
         scores
             .entry(team_1_name)
-            .and_modify(|old| _ = old.add(&ts1))
+            .and_modify(|old| old.add(&ts1))
             .or_insert(ts1);
 
         scores
             .entry(team_2_name)
-            .and_modify(|old| _ = old.add(&ts2))
+            .and_modify(|old| old.add(&ts2))
             .or_insert(ts2);
     }
 
