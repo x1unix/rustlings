@@ -23,8 +23,8 @@ fn main() {
             thread::sleep(Duration::from_millis(250));
 
             // TODO: You must take an action before you update a shared value.
-            let v = status_shared.lock();
-            status_shared.jobs_done += 1;
+            let mut v = status_shared.lock().unwrap();
+            v.jobs_done += 1;
         });
         handles.push(handle);
     }
@@ -34,6 +34,7 @@ fn main() {
         handle.join().unwrap();
     }
 
+    let v = status.lock().unwrap();
     // TODO: Print the value of `JobStatus.jobs_done`.
-    println!("Jobs done: {}", todo!());
+    println!("Jobs done: {}", v.jobs_done);
 }
