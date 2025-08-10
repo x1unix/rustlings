@@ -28,7 +28,13 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
 
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (x, y, z) = tuple;
+        match (x.try_into(), y.try_into(), z.try_into()) {
+            (Ok(red), Ok(green), Ok(blue)) => Ok(Color { red, green, blue }),
+            _ => Err(IntoColorError::IntConversion),
+        }
+    }
 }
 
 // TODO: Array implementation.
