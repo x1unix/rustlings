@@ -6,6 +6,7 @@
 
 #![allow(clippy::useless_vec)]
 use std::convert::{TryFrom, TryInto};
+use std::num::TryFromIntError;
 
 #[derive(Debug, PartialEq)]
 struct Color {
@@ -23,17 +24,23 @@ enum IntoColorError {
     IntConversion,
 }
 
+impl From<TryFromIntError> for IntoColorError {
+    fn from(_: TryFromIntError) -> Self {
+        IntoColorError::IntConversion
+    }
+}
+
 // TODO: Tuple implementation.
 // Correct RGB color values must be integers in the 0..=255 range.
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
 
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
-        let (x, y, z) = tuple;
-        match (x.try_into(), y.try_into(), z.try_into()) {
-            (Ok(red), Ok(green), Ok(blue)) => Ok(Color { red, green, blue }),
-            _ => Err(IntoColorError::IntConversion),
-        }
+        Ok(Color {
+            red: tuple.0.try_into()?,
+            green: tuple.1.try_into()?,
+            blue: tuple.2.try_into()?,
+        })
     }
 }
 
@@ -41,7 +48,13 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        Ok(Color {
+            red: arr[0].try_into()?,
+            green: arr[1].try_into()?,
+            blue: arr[2].try_into()?,
+        })
+    }
 }
 
 // TODO: Slice implementation.
@@ -49,7 +62,16 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        match slice {
+            [r, g, b] => Ok(Color {
+                red: u8::try_from(*r)?,
+                green: u8::try_from(*g)?,
+                blue: u8::try_from(*b)?,
+            }),
+            _ => Err(IntoColorError::BadLen),
+        }
+    }
 }
 
 fn main() {
